@@ -23,15 +23,13 @@
         "tag": "dns-proxy-bakup",
         "type": "https",
         "server": "dns.sse.cisco.com",
-        "domain_resolver": "dns-resolver",
-        "detour": "🚀 Global"
+        "domain_resolver": "dns-resolver"
       },
       {
         "tag": "dns-proxy",
         "type": "https",
         "server": "dns.google",
-        "domain_resolver": "dns-resolver",
-        "detour": "🚀 Global"
+        "domain_resolver": "dns-resolver"
       },
       {
         "tag": "dns-fakeip",
