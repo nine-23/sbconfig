@@ -1,0 +1,30 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[codz]
+*$py.class
+# Virtual environments (虚拟环境)
+.venv/
+venv/
+env/
+ENV/
+# Distribution / packaging (打包产物)
+build/
+dist/
+*.egg-info/
+.eggs/
+# Unit test / coverage reports
+.pytest_cache/
+.coverage
+htmlcov/
+# Environment variables & secrets (本地敏感配置)
+.env
+.env.local
+.env.*.local
+# Vercel 本地缓存目录
+.vercel/
+# IDE & OS files
+.vscode/
+.idea/
+.DS_Store
+
+config.json
