@@ -108,7 +108,6 @@
         "🇺🇸 The United States of America",
         "🇬🇧 United Kingdom",
         "🇸🇬 Singapore",
-        "🪆 Proxy-ip",
         "✋ Proxy"
       ]
     },
@@ -121,18 +120,8 @@
     },
     {
       "type": "urltest",
-      "tag": "🪆 Proxy-ip",
-      "outbounds": [
-        "+PROXY-IP"
-      ],
-      "url": "http://www.gstatic.com/generate_204",
-      "interval": "3m"
-    },
-    {
-      "type": "urltest",
       "tag": "🇬🇧 United Kingdom",
       "outbounds": [
-        "-PROXY-IP",
         "+🇬🇧|英国|GB|gb|uk|UK"
       ],
       "url": "http://www.gstatic.com/generate_204",
@@ -142,7 +131,6 @@
       "type": "urltest",
       "tag": "🇸🇬 Singapore",
       "outbounds": [
-        "-PROXY-IP",
         "+sg|SG|新加坡|🇸🇬"
       ],
       "url": "http://www.gstatic.com/generate_204",
@@ -152,7 +140,6 @@
       "type": "urltest",
       "tag": "🇭🇰 Hong Kong",
       "outbounds": [
-        "-PROXY-IP",
         "+hk|HK|🇭🇰|香港|Hong Kong"
       ],
       "url": "http://www.gstatic.com/generate_204",
@@ -162,7 +149,6 @@
       "type": "urltest",
       "tag": "🇺🇸 The United States of America",
       "outbounds": [
-        "-PROXY-IP",
         "+美国|us|🇺🇸"
       ],
       "url": "http://www.gstatic.com/generate_204",

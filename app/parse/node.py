@@ -1,6 +1,4 @@
 # 导入你的协议解析模块（按你实际的 protocol 目录位置调整导入路径）
-from copy import deepcopy
-
 from app.protocol import vless
 import re
 
@@ -22,7 +20,7 @@ REGION_RULES = {
 group_to_emoji = {f"G{i}": emoji for i, emoji in enumerate(REGION_RULES.keys())}
 
 
-def replace_node(node: dict) -> tuple:
+def replace_node(node: dict):
 
     # 2. 动态生成命名捕获组正则：(?P<HK>HK|香港)|(?P<TW>TW|台湾)|...
     pattern_str = "|".join(
@@ -35,23 +33,18 @@ def replace_node(node: dict) -> tuple:
     match = pattern.search(node["tag"])
     if match:
         emoji = group_to_emoji[match.lastgroup]
-        node_proxy = deepcopy(node)
         node["tag"] = f"{emoji} - {node['tag']}"
 
-        # 删除原有节点的反代ip，
-        # 复制相同的ip 加上相同区域的反代路径
+        # 若有加上反代地址
         try:
-            node_proxy["transport"]["path"] = (
+            node["transport"]["path"] = (
                 f"ProxyIP.{REGION_RULES[emoji][0]}.CMLiussss.net"
             )
-            node_proxy["tag"] = f"{emoji} - PROXY-IP - {node_proxy['tag']}"
-            node["transport"]["path"] = "/"
+            node["tag"] = f"{node['tag']} - PROXY-IP"
         except IndexError:
-            return node, False
+            pass
 
-        return node, node_proxy
-
-    return node, False
+    return node
 
 
 def main(subscription) -> list:
@@ -70,9 +63,7 @@ def main(subscription) -> list:
 
         node = handler.main(line, used_tags)
         if node:
-            node, node_proxy = replace_node(node)
-            if node_proxy:
-                node_outbounds.append(node_proxy)
+            node = replace_node(node)
             node_outbounds.append(node)
 
     return node_outbounds
