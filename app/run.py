@@ -10,7 +10,17 @@ def generate_config(sub_input: str, input_temp: str = "", header="") -> dict:
     parse.main(sub_input, allow_local_file=False)
     # 2. 读取模板（支持编号 "1"、文件名 "base.json"、远程 URL 或默认模板）
     generated.main(input_temp)
-    return config.TEMP_DATA
+
+    # 恢复配置初始值， 防止全局变量或单例状态污染
+    config_data = config.TEMP_DATA
+    config.TEMP_OK = config.DEFAULT_TEMP
+    config.UPLAD_UA = ""
+    config.TEMP_DATA = {}
+    config.SINGBOX_CONFIG = {}
+    config.SUBSCRIPTION = ""
+    config.NODE = []
+
+    return config_data
 
 
 def cli() -> None:
