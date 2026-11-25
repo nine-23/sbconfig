@@ -1,18 +1,14 @@
+import threading
 from app.parse import parse
 from app.main import generated
 from app import config
+from copy import deepcopy
+
+_CONFIG_LOCK = threading.Lock()
 
 
-def generate_config(sub_input: str, input_temp: str = "", header="") -> dict:
-    """专供 Vercel 接口调用的入口，复用 base 模块逻辑"""
-    config.UPLAD_UA = header
-    # 1. 解析订阅（Web 接口禁止读取服务器本地文件)
-    parse.main(sub_input, allow_local_file=False)
-    # 2. 读取模板（支持编号 "1"、文件名 "base.json"、远程 URL 或默认模板）
-    generated.main(input_temp)
-
-    # 恢复配置初始值， 防止全局变量或单例状态污染
-    config_data = config.TEMP_DATA
+def _reset_state() -> None:
+    """强制重置所有运行时全局状态"""
     config.TEMP_OK = config.DEFAULT_TEMP
     config.UPLAD_UA = ""
     config.TEMP_DATA = {}
@@ -20,7 +16,22 @@ def generate_config(sub_input: str, input_temp: str = "", header="") -> dict:
     config.SUBSCRIPTION = ""
     config.NODE = []
 
-    return config_data
+
+def generate_config(sub_input: str, input_temp: str = "", header="") -> dict:
+    """专供 Vercel 接口调用的入口，复用 base 模块逻辑"""
+    with _CONFIG_LOCK:
+        _reset_state()
+        config.UPLAD_UA = header
+        try:
+            # 1. 解析订阅（Web 接口禁止读取服务器本地文件)
+            parse.main(sub_input, allow_local_file=False)
+            # 2. 读取模板
+            generated.main(input_temp)
+            # 返回深拷贝，断开与全局变量的引用
+            return deepcopy(config.TEMP_DATA)
+        finally:
+            # 无论是否报错，释放锁前必清空全局状态
+            _reset_state()
 
 
 def cli() -> None:

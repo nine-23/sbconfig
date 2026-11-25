@@ -4,7 +4,7 @@ from app import config
 from app import requests
 
 
-def findtemp(number_temp: int) -> None:
+def findtemp(number_temp: int):
     """
     note: 按照仓库编号 查找模板文件路径
     number_temp: 模板所处编号 模板格式为 1-config.json 2.config.json 格式
@@ -32,6 +32,7 @@ def main(input_temp: str = "") -> None:
             # status_code 是整数 200，不是字符串
             if response.status_code == 200:
                 config.TEMP_DATA = response.json()
+                return
             raise requests.HTTPError(f"模板链接请求错误: HTTP {response.status_code}")
         except Exception as e:
             raise requests.HTTPError(f"模板链接异常: {e}")
