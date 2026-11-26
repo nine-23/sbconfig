@@ -20,12 +20,6 @@
         "detour": "Direct ☘️"
       },
       {
-        "tag": "dns-proxy-bakup",
-        "type": "https",
-        "server": "dns.sse.cisco.com",
-        "domain_resolver": "dns-resolver"
-      },
-      {
         "tag": "dns-proxy",
         "type": "https",
         "server": "dns.google",
@@ -35,22 +29,34 @@
         "tag": "dns-fakeip",
         "type": "fakeip",
         "inet4_range": "198.18.0.0/15",
-        "inet6_range": "fc00::/18"
+        "inet6_range": "2001:2::/48"
       }
     ],
     "rules": [
       {
         "action": "reject",
-        "rule_set": "geosite-anti-ad"
+        "rule_set": "geosite:anti-ad"
       },
       {
         "server": "dns-direct",
         "rule_set": [
-          "geosite-cdn",
-          "geosite-direct",
-          "domain-game-download",
-          "domain-download"
+          "geosite:mydirect",
+          "geosite:tld-cn",
+          "geosite:geolocation-cn"
         ]
+      },
+      {
+        "type": "logical",
+        "mode": "and",
+        "rules": [
+          {
+            "rule_set": "geosite:geolocation-!cn@cn"
+          },
+          {
+            "rule_set": "geosite:geolocation-!cn"
+          }
+        ],
+        "server": "dns-direct"
       },
       {
         "query_type": [
@@ -61,7 +67,7 @@
       }
     ],
     "final": "dns-proxy",
-    "strategy": "ipv4_only",
+    "strategy": "prefer_ipv4",
     "cache_capacity": 4096,
     "reverse_mapping": true
   },
@@ -74,17 +80,18 @@
   "inbounds": [
     {
       "address": [
-        "172.18.0.1/30"
+        "172.18.0.1/30",
+        "fdfe:dcba:9876::1/126"
       ],
       "route_address": [
         "0.0.0.0/1",
-        "128.0.0.0/1"
+        "128.0.0.0/1",
+        "::/1",
+        "8000::/1"
       ],
       "route_exclude_address": [
-        "10.0.0.0/8",
-        "172.16.0.0/12",
         "192.168.0.0/16",
-        "169.254.0.0/16"
+        "fc00::/7"
       ],
       "auto_route": true,
       "strict_route": true,
@@ -165,7 +172,7 @@
       {
         "action": "bypass",
         "rule_set": [
-          "geoport-mybypass"
+          "port:mybypass"
         ]
       },
       {
@@ -182,59 +189,45 @@
       },
       {
         "rule_set": [
-          "geosite-anti-ad"
+          "geosite:anti-ad"
         ],
         "action": "reject"
       },
       {
         "rule_set": [
-          "geosite-myglobal"
+          "geosite:myproxy"
         ],
         "outbound": "🚀 Global"
       },
       {
         "rule_set": [
-          "geosite-google"
-        ],
-        "outbound": "🇭🇰 Hong Kong"
-      },
-      {
-        "rule_set": [
-          "geosite-github",
-          "geosite-telegram"
-        ],
-        "outbound": "🇺🇸 The United States of America"
-      },
-      {
-        "rule_set": [
-          "geosite-mydirect",
-          "domain-game-download",
-          "domain-download",
-          "geosite-microsoft",
-          "geosite-cdn",
-          "geosite-direct"
+          "geosite:mydirect"
         ],
         "outbound": "Direct ☘️"
       },
       {
-        "action": "resolve",
-        "server": "dns-proxy",
-        "rule_set": [
-          "geoip-telegram",
-          "geoip-cdn",
-          "geoip-china"
-        ]
-      },
-      {
-        "rule_set": [
-          "geoip-telegram"
+        "type": "logical",
+        "mode": "and",
+        "rules": [
+          {
+            "rule_set": "geosite:geolocation-!cn@cn"
+          },
+          {
+            "rule_set": "geosite:geolocation-!cn"
+          }
         ],
-        "outbound": "🇺🇸 The United States of America"
+        "outbound": "Direct ☘️"
       },
       {
         "rule_set": [
-          "geoip-cdn",
-          "geoip-china"
+          "geosite:geolocation-!cn"
+        ],
+        "outbound": "🚀 Global"
+      },
+      {
+        "rule_set": [
+          "geosite:geolocation-cn",
+          "geosite:tld-cn"
         ],
         "outbound": "Direct ☘️"
       }
@@ -242,109 +235,59 @@
     "rule_set": [
       {
         "type": "remote",
-        "tag": "geosite-anti-ad",
+        "tag": "geosite:anti-ad",
         "format": "binary",
         "http_client": "proxy-client",
         "url": "https://raw.githubusercontent.com/privacy-protection-tools/anti-ad.github.io/master/docs/anti-ad-sing-box.srs"
       },
       {
         "type": "remote",
-        "tag": "geosite-myglobal",
+        "tag": "geosite:myproxy",
+        "format": "source",
+        "http_client": "proxy-client",
+        "url": "https://raw.githubusercontent.com/kumalum/file/main/sb/myproxy.json"
+      },
+      {
+        "type": "remote",
+        "tag": "port:mybypass",
         "format": "source",
         "http_client": "proxy-client",
         "url": "https://raw.githubusercontent.com/kumalum/file/main/sb/myreject.json"
       },
       {
         "type": "remote",
-        "tag": "geoport-mybypass",
-        "format": "source",
-        "http_client": "proxy-client",
-        "url": "https://raw.githubusercontent.com/kumalum/file/main/sb/myreject.json"
-      },
-      {
-        "type": "remote",
-        "tag": "geosite-mydirect",
+        "tag": "geosite:mydirect",
         "format": "source",
         "http_client": "proxy-client",
         "url": "https://raw.githubusercontent.com/kumalum/file/main/sb/mydirect.json"
       },
       {
         "type": "remote",
-        "tag": "domain-game-download",
-        "format": "source",
-        "http_client": "proxy-client",
-        "url": "https://ruleset.skk.moe/sing-box/domainset/game-download.json"
-      },
-      {
-        "type": "remote",
-        "tag": "domain-download",
-        "format": "source",
-        "http_client": "proxy-client",
-        "url": "https://ruleset.skk.moe/sing-box/domainset/download.json"
-      },
-      {
-        "type": "remote",
-        "tag": "geosite-youtube",
+        "tag": "geosite:geolocation-!cn",
         "format": "binary",
         "http_client": "proxy-client",
-        "url": "https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-youtube.srs"
+        "url": "https://raw.githubusercontent.com/xmdhs/sing-geosite/rule-set/geosite-geolocation-!cn.srs"
       },
       {
         "type": "remote",
-        "tag": "geosite-telegram",
+        "tag": "geosite:geolocation-cn",
         "format": "binary",
         "http_client": "proxy-client",
-        "url": "https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-telegram.srs"
+        "url": "https://raw.githubusercontent.com/xmdhs/sing-geosite/rule-set/geosite-geolocation-cn.srs"
       },
       {
         "type": "remote",
-        "tag": "geosite-github",
+        "tag": "geosite:geolocation-!cn@cn",
         "format": "binary",
         "http_client": "proxy-client",
-        "url": "https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-github.srs"
+        "url": "https://raw.githubusercontent.com/xmdhs/sing-geosite/rule-set/geosite-geolocation-!cn@cn.srs"
       },
       {
         "type": "remote",
-        "tag": "geosite-google",
+        "tag": "geosite:tld-cn",
         "format": "binary",
         "http_client": "proxy-client",
-        "url": "https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-google.srs"
-      },
-      {
-        "type": "remote",
-        "tag": "geosite-microsoft",
-        "format": "source",
-        "url": "https://ruleset.skk.moe/sing-box/non_ip/microsoft.json"
-      },
-      {
-        "type": "remote",
-        "tag": "geosite-cdn",
-        "format": "source",
-        "url": "https://ruleset.skk.moe/sing-box/non_ip/cdn.json"
-      },
-      {
-        "type": "remote",
-        "tag": "geosite-direct",
-        "format": "source",
-        "url": "https://ruleset.skk.moe/sing-box/non_ip/direct.json"
-      },
-      {
-        "type": "remote",
-        "tag": "geoip-telegram",
-        "format": "source",
-        "url": "https://ruleset.skk.moe/sing-box/ip/telegram.json"
-      },
-      {
-        "type": "remote",
-        "tag": "geoip-china",
-        "format": "source",
-        "url": "https://ruleset.skk.moe/sing-box/ip/china_ip.json"
-      },
-      {
-        "type": "remote",
-        "tag": "geoip-cdn",
-        "format": "source",
-        "url": "https://ruleset.skk.moe/sing-box/ip/cdn.json"
+        "url": "https://raw.githubusercontent.com/xmdhs/sing-geosite/rule-set/geosite-tld-cn.srs"
       }
     ],
     "final": "🚀 Global",
